@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
+    "target": "es5",
+    "allowJs": true,
+    "skipLibCheck": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": [
+    "src",
+    "typings"
+  ]
+}
