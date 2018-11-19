@@ -7,7 +7,13 @@ import React, {
 } from "react";
 import { ReactReduxContext, Provider } from "react-redux";
 import { Selector } from "reselect";
-import { combineReducers, AnyAction,Dispatch, ActionCreator, Store } from "redux";
+import {
+  combineReducers,
+  AnyAction,
+  Dispatch,
+  ActionCreator,
+  Store
+} from "redux";
 
 import { createStore } from "redux";
 
@@ -18,52 +24,47 @@ import { createStore } from "redux";
 //   return val;
 // }
 
-
 // function useActionOld<T extends ActionCreator<any>>(action: T): T {
 //   const store = useContext(ReactReduxContext).store;
 //   return bindDispatch(action, store.dispatch)
 // }
 
-
 function useSelector<S>(selector: Selector<AppState, S>) {
-  const store = useContext(MyStoreContext)!
+  const store = useContext(MyStoreContext)!;
 
-  const [compState, setCompState] = useState(()=>selector(store.getState()));
-  let prevState = compState
-  useEffect(
-    () => {
-      console.log('calling subscribe')
-      return store.subscribe(() => {
-        const newState = selector(store.getState());
-        if (prevState !== newState) {
-          // debugger;
-          console.log('setting new state')
-          prevState = newState
-          setCompState(newState);
-        }
-      })},
-    []
-  );
+  const [compState, setCompState] = useState(() => selector(store.getState()));
+  let prevState = compState;
+  useEffect(() => {
+    console.log("calling subscribe");
+    return store.subscribe(() => {
+      const newState = selector(store.getState());
+      if (prevState !== newState) {
+        // debugger;
+        // console.log('setting new state')
+        prevState = newState;
+        setCompState(newState);
+      }
+    });
+  }, []);
   return compState;
 }
 
 export function bindDispatch<T extends ActionCreator<any>>(
   fn: T,
-  dispatch: Dispatch,
+  dispatch: Dispatch
 ): T {
   return (((...args: any[]) => dispatch((fn as any)(...args))) as any) as T;
 }
 
-
 function useAction<T extends ActionCreator<any>>(action: T): T {
-  const store = useContext(MyStoreContext)!
+  const store = useContext(MyStoreContext)!;
   // const [compState, setCompState] = useState(()=>selector(store.getState()));
-  return bindDispatch(action, store.dispatch)
+  return bindDispatch(action, store.dispatch);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-interface CardsState {
+interface ListState {
   list: {}[];
 }
 
@@ -72,12 +73,16 @@ interface CountState {
 }
 
 interface AppState {
-  cards: CardsState;
+  list: ListState;
   count: CountState;
 }
 
 function countSelector(state: AppState) {
   return state.count.count;
+}
+
+function listSelector(state: AppState) {
+  return state.list.list;
 }
 
 function incrementAction() {
@@ -107,10 +112,7 @@ function countReducer(
   }
 }
 
-function cardsReducer(
-  state: CardsState = { list: [] },
-  action: any
-): CardsState {
+function listReducer(state: ListState = { list: [] }, action: any): ListState {
   switch (action.type) {
     case "UPDATE_LIST":
       return {
@@ -123,14 +125,13 @@ function cardsReducer(
 }
 
 const rootReducer = combineReducers({
-  cards: cardsReducer,
+  list: listReducer,
   count: countReducer
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
 const Button = () => {
-  // debugger;
   const num = useSelector(countSelector);
   const onClick = useAction(incrementAction);
   console.log("rerendering button");
@@ -142,12 +143,15 @@ const Button = () => {
 };
 
 const List = () => {
-  // const num = useSelector(countSelector);
+  const list = useSelector(listSelector);
   const onClick = useAction(updateList);
   console.log("rerendering list");
   return (
     <div>
       <button onClick={onClick}>{`update list`}</button>
+      {list.map((_, ind) => (
+        <div key={ind}>listItem</div>
+      ))}
     </div>
   );
 };
@@ -157,20 +161,20 @@ function StatelessList() {
 
   return null;
 }
-const MyStoreContext = React.createContext<Store | null>(null)
+const MyStoreContext = React.createContext<Store | null>(null);
 
 class App extends Component {
   store = createStore(rootReducer);
   render() {
     return (
       <MyStoreContext.Provider value={this.store}>
-      <Provider store={this.store}>
-        <div className="App">
-          <Button />
-          <List />
-          <StatelessList />
-        </div>
-      </Provider>
+        <Provider store={this.store}>
+          <div className="App">
+            <Button />
+            <List />
+            <StatelessList />
+          </div>
+        </Provider>
       </MyStoreContext.Provider>
     );
   }
